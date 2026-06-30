@@ -1,30 +1,14 @@
-#include <DHT.h>
-
-#define DHTPIN 2
-#define DHTTYPE DHT11
-
-DHT dht(DHTPIN, DHTTYPE);
-
 void setup() {
   Serial.begin(9600);
-  dht.begin();
 }
 
 void loop() {
-  float temp = dht.readTemperature();
-  float hum = dht.readHumidity();
+  int load = random(0, 100);
 
-  // Simple workload logic
-  if (isnan(temp) || temp > 35) {
-    Serial.println("Node Status : BUSY");
-  } else {
-    Serial.println("Node Status : IDLE");
-  }
+  if (load > 60)
+    Serial.println("Mega Node Status : BUSY");
+  else
+    Serial.println("Mega Node Status : IDLE");
 
-  Serial.print("TEMP: ");
-  Serial.print(temp);
-  Serial.print(" HUM: ");
-  Serial.println(hum);
-
-  delay(2000);
+  delay(1500);
 }
