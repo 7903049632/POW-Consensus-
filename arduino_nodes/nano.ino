@@ -1,14 +1,19 @@
 void setup() {
   Serial.begin(9600);
+  Serial.println("NANO_READY");
 }
 
 void loop() {
-  int state = random(0, 2);
 
-  if (state == 0)
-    Serial.println("Nano Node Status : IDLE");
-  else
-    Serial.println("Nano Node Status : BUSY");
+  if (Serial.available()) {
 
-  delay(2000);
+    String msg = Serial.readStringUntil('\n');
+    msg.trim();
+
+    if (msg.startsWith("MINED")) {
+      Serial.println("VALIDATED|TRUE");
+    } else {
+      Serial.println("VALIDATED|FALSE");
+    }
+  }
 }

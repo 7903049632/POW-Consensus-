@@ -1,106 +1,60 @@
-import random
-import serial
+import csv
 import time
+import random
 
+FILENAME = "final_dataset.csv"
 
-class Node:
-
-    def __init__(self, name):
-        self.name = name
-        self.status = "IDLE"
-        self.busy_time = 0
-        self.idle_time = 0
-
-
-    def update(self):
-
-        # UNO uses real sensor
-        if self.name == "UNO":
-
-            try:
-
-                data = arduino.readline().decode(
-                    errors='ignore'
-                ).strip()
-
-                if "Node Status : BUSY" in data:
-                    self.status = "BUSY"
-
-                elif "Node Status : IDLE" in data:
-                    self.status = "IDLE"
-
-            except:
-                self.status = "IDLE"
-
-
-        # Nano Mega simulated
-        else:
-
-            self.status = random.choice(
-                ["BUSY","IDLE"]
-            )
-
-
-        if self.status=="BUSY":
-
-            self.busy_time=random.randint(2,6)
-            self.idle_time=0
-
-
-        else:
-
-            self.idle_time=random.randint(2,6)
-            self.busy_time=0
-
-
-
-    def show(self):
-
-        print(
-            f"{self.name} --> "
-            f"{self.status}"
-            f" | Busy:{self.busy_time}s"
-            f" | Idle:{self.idle_time}s"
-        )
-
-
-
-arduino = serial.Serial(
-        'COM9',
-        9600,
-        timeout=1
-)
-
-time.sleep(2)
-
-
-
-nodes=[
-
-    Node("UNO"),
-    Node("NANO"),
-    Node("MEGA")
-
+fields = [
+    "Epoch",
+    "Difficulty",
+    "Tx_Count",
+    "Block_Size",
+    "UNO",
+    "NANO",
+    "MEGA",
+    "Winner",
+    "Mining_Time"
 ]
 
+nodes = ["UNO", "NANO", "MEGA", "ESP32"]
 
-print("IoT Nodes Started")
+def simulate_node_status(winner):
+    status = {}
+    for n in nodes:
+        status[n] = "MINING" if n == winner else "IDLE"
+    return status
 
+def generate_row(epoch):
+    difficulty = random.randint(1, 3)
+    tx = random.randint(5, 25)
+    block_size = random.randint(3000, 8000)
 
-for epoch in range(1,11):
+    winner = random.choice(nodes)
+    mining_time = round(random.uniform(0.00005, 0.5), 6)
 
+    status = simulate_node_status(winner)
 
-    print("\nEpoch",epoch)
+    return [
+        epoch,
+        difficulty,
+        tx,
+        block_size,
+        status["UNO"],
+        status["NANO"],
+        status["MEGA"],
+        winner,
+        mining_time
+    ]
 
+def create_dataset(rows=600):
+    with open(FILENAME, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(fields)
 
-    for node in nodes:
+        for i in range(rows):
+            row = generate_row(i)
+            writer.writerow(row)
+            print(f"Row {i} written")
 
-        node.update()
-        node.show()
-
-
-    time.sleep(1)
-
-
-
-print("\nSimulation Completed")
+if __name__ == "__main__":
+    create_dataset()

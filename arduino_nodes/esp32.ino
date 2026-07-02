@@ -1,28 +1,24 @@
 void setup() {
   Serial.begin(9600);
-  randomSeed(analogRead(0));
+  Serial.println("ESP32_READY");
 }
 
 void loop() {
-  // Simulated temperature (you can replace with real sensor later)
-  int temperature = random(20, 50);
-  int humidity = random(30, 80);
 
-  // Node load simulation
-  int load = random(0, 100);
+  if (Serial.available()) {
 
-  // BUSY / IDLE logic
-  if (load > 60) {
-    Serial.println("ESP32 Node Status : BUSY");
-  } else {
-    Serial.println("ESP32 Node Status : IDLE");
+    String msg = Serial.readStringUntil('\n');
+    msg.trim();
+
+    if (msg.startsWith("MINE")) {
+
+      long nonce = random(1000, 9999);
+      long hash = random(50000, 99999);
+
+      Serial.print("MINED|ESP32|");
+      Serial.print(nonce);
+      Serial.print("|");
+      Serial.println(hash);
+    }
   }
-
-  // Sensor-like output
-  Serial.print("ESP32 TEMP: ");
-  Serial.print(temperature);
-  Serial.print(" | HUM: ");
-  Serial.println(humidity);
-
-  delay(2000);
 }

@@ -1,20 +1,12 @@
-import serial
-import time
+status = {
+    "UNO": "UNKNOWN",
+    "NANO": "UNKNOWN",
+    "MEGA": "UNKNOWN",
+    "ESP32": "UNKNOWN"
+}
 
-arduino = serial.Serial('COM9',9600,timeout=1)
+def update(node, value):
+    status[node] = value
 
-time.sleep(2)
-
-while True:
-
-    data = arduino.readline().decode().strip()
-
-    if data:
-
-        print(data)
-
-        if "Node Status : IDLE" in data:
-            print("Node Available")
-
-        elif "Node Status : BUSY" in data:
-            print("Node Busy")
+def get_all():
+    return status

@@ -1,87 +1,34 @@
-import random
-import hashlib
 import time
+import hashlib
 
-# -------------------------------
-# Create Transactions
-# -------------------------------
+class Block:
+    def __init__(self, index, data, prev_hash, nonce, miner):
+        self.index = index
+        self.data = data
+        self.prev_hash = prev_hash
+        self.nonce = nonce
+        self.miner = miner
+        self.timestamp = time.time()
+        self.hash = self.calculate_hash()
 
-BLOCK_SIZE = 5 * 1024      # 5KB
-current_size = 0
-transactions = []
-
-while current_size < BLOCK_SIZE:
-
-    tx_size = random.randint(400,600)
-
-    transactions.append(tx_size)
-
-    current_size += tx_size
-
-
-print("\nBlock Created")
-print("Transactions :",len(transactions))
-print("Block Size :",current_size,"bytes")
+    def calculate_hash(self):
+        text = f"{self.index}{self.data}{self.prev_hash}{self.nonce}{self.miner}"
+        return hashlib.sha256(text.encode()).hexdigest()
 
 
-# -------------------------------
-# Assume node status
-# -------------------------------
+class Blockchain:
+    def __init__(self):
+        self.chain = []
+        self.difficulty = 4
 
-node_status = "IDLE"
+    def last_hash(self):
+        if not self.chain:
+            return "0"
+        return self.chain[-1].hash
 
-
-# -------------------------------
-# PoW Mining
-# -------------------------------
-
-def mine_block(difficulty):
-
-    nonce = 0
-
-    target = "0"*difficulty
-
-
-    while True:
-
-        text = str(nonce)
-
-        hash_value = hashlib.sha256(
-                        text.encode()
-                        ).hexdigest()
-
-
-        if hash_value.startswith(target):
-
-            return nonce,hash_value
-
-
-        nonce += 1
-
-
-# -------------------------------
-# Mining Decision
-# -------------------------------
-
-if node_status=="IDLE":
-
-    print("\nNode Available")
-    print("Mining Started")
-
-
-    nonce,hash_value = mine_block(2)
-
-
-    print("\nMining Success")
-
-    print("Nonce :",nonce)
-
-    print("Hash :",hash_value)
-
-
-
-else:
-
-    print("Node Busy")
-
-    print("Mining Skipped")
+    def add_block(self, block):
+        self.chain.append(block)
+        print("\n⛓️ BLOCK ADDED TO CHAIN")
+        print("Index:", block.index)
+        print("Miner:", block.miner)
+        print("Hash:", block.hash[:20], "...\n")

@@ -1,39 +1,36 @@
 import serial
+import json
 import time
-import hashlib
 
-print("Program Started")
+PORTS = [
+    "COM3",  # UNO (change if needed)
+    "COM4",  # NANO
+    "COM5",  # MEGA
+    "COM6"   # ESP32
+]
 
-arduino = serial.Serial('COM9', 9600, timeout=1)
-time.sleep(2)
+BAUD = 9600
 
-def mine_block():
-    print("⛏️ Mining started...")
+connections = []
 
-    nonce = 0
-    difficulty = "0000"
+for p in PORTS:
+    try:
+        connections.append(serial.Serial(p, BAUD, timeout=1))
+        print(f"Connected: {p}")
+    except:
+        print(f"Failed: {p}")
 
-    while True:
-        text = str(nonce).encode()
-        hash_result = hashlib.sha256(text).hexdigest()
-
-        if hash_result[:4] == difficulty:
-            print("✅ Block Mined!")
-            print("Hash:", hash_result)
-            break
-
-        nonce += 1
+def read_line(ser):
+    try:
+        line = ser.readline().decode().strip()
+        if line.startswith("{") and line.endswith("}"):
+            return json.loads(line)
+    except:
+        return None
 
 while True:
-    data = arduino.readline().decode(errors='ignore').strip()
-
-    if data:
-        print("Node Status:", data)
-
-        if data == "IDLE":
-            mine_block()
-
-        elif data == "BUSY":
-            print("⛔ Mining Skipped")
-
-    time.sleep(1)
+    for ser in connections:
+        data = read_line(ser)
+        if data:
+            print("Received:", data)
+    time.sleep(0.5)

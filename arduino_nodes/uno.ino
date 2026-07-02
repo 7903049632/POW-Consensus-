@@ -5,26 +5,43 @@
 
 DHT dht(DHTPIN, DHTTYPE);
 
+int epoch = 0;
+
 void setup() {
   Serial.begin(9600);
   dht.begin();
+
+  Serial.println("UNO_SENSOR_NODE_READY");
 }
 
 void loop() {
+
   float temp = dht.readTemperature();
   float hum = dht.readHumidity();
 
-  // Simple workload logic
-  if (isnan(temp) || temp > 35) {
-    Serial.println("Node Status : BUSY");
-  } else {
-    Serial.println("Node Status : IDLE");
+  // sensor safety check
+  if (isnan(temp) || isnan(hum)) {
+    Serial.println("SENSOR_ERROR");
+    delay(2000);
+    return;
   }
 
-  Serial.print("TEMP: ");
+  int tx_count = random(5, 20);
+  int difficulty = 1;
+
+  // IMPORTANT FORMAT (Python expects this)
+  Serial.print("SENSOR,");
+  Serial.print(epoch);
+  Serial.print(",");
   Serial.print(temp);
-  Serial.print(" HUM: ");
-  Serial.println(hum);
+  Serial.print(",");
+  Serial.print(hum);
+  Serial.print(",");
+  Serial.print(tx_count);
+  Serial.print(",");
+  Serial.println(difficulty);
+
+  epoch++;
 
   delay(2000);
 }
